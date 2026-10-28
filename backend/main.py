@@ -8,6 +8,7 @@ from backend.routers.observations import router as observations_router
 from backend.routers.trends import router as trends_router
 from backend.routers.statistics import router as statistics_router
 from backend.routers.evaluation import router as evaluation_router
+from backend.routers.forecast import router as forecast_router
 
 app = FastAPI(
     title="AirAware API",
@@ -30,6 +31,7 @@ app.include_router(observations_router)
 app.include_router(trends_router)
 app.include_router(statistics_router)
 app.include_router(evaluation_router)
+app.include_router(forecast_router)
 
 
 @app.get("/")

@@ -5,6 +5,7 @@ const NAV = [
   { to: '/trends',      icon: '📈', label: 'Trends'     },
   { to: '/statistics',  icon: '📊', label: 'Statistics' },
   { to: '/evaluation',  icon: '🔬', label: 'Evaluation' },
+  { to: '/forecast',    icon: '🔮', label: 'Forecast'   },
 ];
 
 export default function Layout() {

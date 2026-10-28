@@ -117,6 +117,41 @@ export interface StatisticsOverview {
 
 export interface EvaluationCities { cities: string[]; models: string[] }
 
+export interface ForecastCities {
+  cities: string[];
+  max_horizon: number;
+  supported_horizons: number[];
+  model: string;
+  note: string;
+}
+
+export interface ForecastPoint {
+  date: string;
+  predicted_pm25: number;
+  horizon_day: number;
+}
+
+export interface ForecastChartPoint {
+  date: string;
+  pm25_mean: number;
+  is_forecast: boolean;
+  horizon_day?: number;
+}
+
+export interface ForecastCity {
+  city: string;
+  horizon: number;
+  latest_observed_date: string;
+  latest_observed_pm25: number | null;
+  historical_tail: ForecastChartPoint[];
+  forecast: ForecastPoint[];
+  chart_series: ForecastChartPoint[];
+  train_rows: number;
+  feature_importance: Record<string, number>;
+  model_note: string;
+  disclaimer: string;
+}
+
 export interface EvaluationCity {
   city: string;
   test_window: { start: string; end: string; max_samples: number | null } | null;
@@ -156,4 +191,12 @@ export const api = {
   getEvaluationCities: () => get<EvaluationCities>('/evaluation/cities'),
 
   getCityEvaluation: (city: string) => get<EvaluationCity>(`/evaluation/${encodeURIComponent(city)}`),
+
+  getForecastCities: () => get<ForecastCities>('/forecast/cities'),
+
+  getCityForecast: (city: string, horizon: number) =>
+    get<ForecastCity>(`/forecast/${encodeURIComponent(city)}`, { horizon }),
+
+  downloadForecast: (city: string, horizon: number) =>
+    download(`/forecast/${encodeURIComponent(city)}/download`, { horizon }),
 };

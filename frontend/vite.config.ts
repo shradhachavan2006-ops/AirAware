@@ -10,6 +10,7 @@ const BACKEND_PATHS = [
   '/trends',
   '/statistics',
   '/evaluation',
+  '/forecast',
   '/health',
   '/docs',
   '/openapi.json',
