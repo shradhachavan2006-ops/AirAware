@@ -1,0 +1,200 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-forest:   #14532d;
+    --color-green:    #16a36a;
+    --color-teal:     #0d9488;
+    --color-mint:     #e8f7ef;
+    --color-ink:      #172b25;
+    --color-muted:    #65756f;
+    --color-surface:  #f7fbf8;
+    --color-card:     #ffffff;
+    --color-border:   #e1ece5;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--color-surface);
+    color: var(--color-ink);
+    font-family: 'Inter', 'DM Sans', system-ui, sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Manrope', 'Inter', system-ui, sans-serif;
+    letter-spacing: -0.025em;
+    color: var(--color-ink);
+  }
+}
+
+@layer components {
+  /* ── Cards ─────────────────────────────────────────── */
+  .card {
+    background: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 12px rgba(20,83,45,0.05);
+  }
+
+  /* ── KPI tiles ──────────────────────────────────────── */
+  .kpi-card {
+    background: white;
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    box-shadow: 0 2px 12px rgba(20,83,45,0.05);
+    transition: box-shadow 0.2s;
+  }
+  .kpi-card:hover {
+    box-shadow: 0 6px 20px rgba(20,83,45,0.09);
+  }
+  .kpi-label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-muted);
+    margin-bottom: 6px;
+  }
+  .kpi-value {
+    font-family: 'Manrope', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #163b2b;
+    line-height: 1;
+  }
+  .kpi-sub {
+    font-size: 0.78rem;
+    color: var(--color-muted);
+    margin-top: 4px;
+  }
+
+  /* ── Section heading ────────────────────────────────── */
+  .section-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #163b2b;
+    margin-bottom: 12px;
+    font-family: 'Manrope', sans-serif;
+  }
+
+  /* ── Pill / badge ───────────────────────────────────── */
+  .pill {
+    display: inline-block;
+    background: #e7f7ed;
+    color: #17633c;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+  .pill-warn {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  /* ── Buttons ────────────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: #16a36a;
+    color: white;
+    border-color: #16a36a;
+  }
+  .btn-primary:hover { background: #128055; }
+  .btn-outline {
+    background: white;
+    color: #16a36a;
+    border-color: #c9dfd1;
+  }
+  .btn-outline:hover { background: #f0faf4; }
+
+  /* ── Form controls ──────────────────────────────────── */
+  .form-label {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+  }
+  .form-control {
+    width: 100%;
+    padding: 7px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    background: white;
+    color: var(--color-ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .form-control:focus { border-color: #16a36a; }
+
+  /* ── Table ──────────────────────────────────────────── */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .data-table th {
+    text-align: left;
+    padding: 8px 12px;
+    background: #f3f8f5;
+    color: #4a6358;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .data-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid #f0f5f2;
+    color: var(--color-ink);
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:hover td { background: #fafdfa; }
+
+  /* ── Status messages ────────────────────────────────── */
+  .msg-info {
+    background: #e8f7ef;
+    border: 1px solid #b2dfc8;
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #155e44;
+    font-size: 0.85rem;
+  }
+  .msg-warn {
+    background: #fffbeb;
+    border: 1px solid #fcd34d;
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #92400e;
+    font-size: 0.85rem;
+  }
+  .msg-error {
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    padding: 14px 18px;
+    color: #991b1b;
+    font-size: 0.85rem;
+  }
+}

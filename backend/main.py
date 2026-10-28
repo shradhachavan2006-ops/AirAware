@@ -5,6 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from backend.routers.meta import router as meta_router
 from backend.routers.dashboard import router as dashboard_router
 from backend.routers.observations import router as observations_router
+from backend.routers.trends import router as trends_router
+from backend.routers.statistics import router as statistics_router
+from backend.routers.evaluation import router as evaluation_router
 
 app = FastAPI(
     title="AirAware API",
@@ -14,10 +17,8 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ],
+    # Allow any localhost/127.0.0.1 origin on any port (covers Vite on 5173/5174/etc.)
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -26,6 +27,9 @@ app.add_middleware(
 app.include_router(meta_router)
 app.include_router(dashboard_router)
 app.include_router(observations_router)
+app.include_router(trends_router)
+app.include_router(statistics_router)
+app.include_router(evaluation_router)
 
 
 @app.get("/")
