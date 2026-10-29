@@ -207,6 +207,7 @@ export default function DatasetManager() {
       loadDatasets();
       // Auto-select the new dataset
       setDataset(result.dataset);
+      navigate('/quality');
     } catch (e: unknown) {
       setUploadMsg({ type: 'error', text: String(e) });
     } finally {
@@ -227,7 +228,7 @@ export default function DatasetManager() {
 
   function selectAndGo(info: DatasetInfo) {
     setDataset(info);
-    navigate('/overview');
+    navigate('/quality');
   }
 
   const demos   = datasets.filter(d => d.is_demo);
