@@ -9,11 +9,18 @@ from backend.routers.trends import router as trends_router
 from backend.routers.statistics import router as statistics_router
 from backend.routers.evaluation import router as evaluation_router
 from backend.routers.forecast import router as forecast_router
+from backend.routers.datasets import router as datasets_router
+from backend.routers.quality import router as quality_router
+from backend.routers.stat_analysis import router as stat_analysis_router
+from backend.routers.regression import router as regression_router
 
 app = FastAPI(
     title="AirAware API",
-    description="Backend API for the AirAware air-quality analytics dashboard.",
-    version="1.0.0",
+    description=(
+        "Backend API for the AirAware V2 air-quality analytics and forecasting platform. "
+        "Supports per-dataset analysis, hypothesis testing, regression and PM2.5 forecasting."
+    ),
+    version="2.0.0",
 )
 
 app.add_middleware(
@@ -32,13 +39,18 @@ app.include_router(trends_router)
 app.include_router(statistics_router)
 app.include_router(evaluation_router)
 app.include_router(forecast_router)
+app.include_router(datasets_router)
+app.include_router(quality_router)
+app.include_router(stat_analysis_router)
+app.include_router(regression_router)
 
 
 @app.get("/")
 def root():
     return {
-        "message": "Welcome to the AirAware API",
+        "message": "Welcome to the AirAware V2 API",
         "status": "running",
+        "version": "2.0.0",
     }
 
 

@@ -78,7 +78,7 @@ export default function Evaluation() {
   // Merge actual + all model predictions into flat chart data
   const chartData = (() => {
     if (!cityData) return [];
-    const map = new Map<string, Record<string, number | null>>();
+    const map = new Map<string, Record<string, any>>();
     for (const pt of cityData.chart_data.actual) {
       map.set(pt.date, { date: pt.date, Actual: pt.actual_pm25 });
     }
@@ -157,7 +157,7 @@ export default function Evaluation() {
                     <YAxis tick={{ fontSize: 11, fill: '#6b7c74' }} tickLine={false} axisLine={false}
                       label={{ value: 'µg/m³', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 10, fill: '#9aaa9f' } }} />
                     <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e0ebe4' }}
-                      formatter={(v: number | null) => v == null ? 'N/A' : v.toFixed(2)} />
+                      formatter={(v: any) => v == null ? 'N/A' : Number(v).toFixed(2)} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     <Line dataKey="Actual" stroke="#14532d" strokeWidth={2.5} dot={false} connectNulls={false} />
                     {cityData.chart_data.models.map(ms => (

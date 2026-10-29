@@ -49,7 +49,7 @@ export default function Trends() {
   // Merge series into flat chart data
   const chartData = (() => {
     if (!data) return [];
-    const dateMap = new Map<string, Record<string, number | null>>();
+    const dateMap = new Map<string, Record<string, any>>();
     for (const s of data.series) {
       for (const pt of s.data) {
         if (!dateMap.has(pt.date)) dateMap.set(pt.date, { date: pt.date });
@@ -152,7 +152,7 @@ export default function Trends() {
                   <YAxis tick={{ fontSize: 11, fill: '#6b7c74' }} tickLine={false} axisLine={false}
                     label={{ value: yLabel, angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 10, fill: '#9aaa9f' } }} />
                   <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e0ebe4' }}
-                    formatter={(v: number | null) => v == null ? 'N/A' : v.toFixed(2)} />
+                    formatter={(v: any) => v == null ? 'N/A' : Number(v).toFixed(2)} />
                   <Legend wrapperStyle={{ fontSize: 12 }} />
                   {selectedCities.map((c, i) => (
                     <Line key={c} dataKey={c} name={c} stroke={CITY_COLORS[i % CITY_COLORS.length]}

@@ -136,7 +136,7 @@ export default function Overview() {
                     <YAxis tick={{ fontSize: 11, fill: '#6b7c74' }} tickLine={false} axisLine={false}
                       label={{ value: 'µg/m³', angle: -90, position: 'insideLeft', offset: 10, style: { fontSize: 10, fill: '#9aaa9f' } }} />
                     <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e0ebe4' }}
-                      formatter={(v: number | null) => v == null ? 'N/A' : v.toFixed(2)} />
+                      formatter={(v: any) => v == null ? 'N/A' : Number(v).toFixed(2)} />
                     <Legend wrapperStyle={{ fontSize: 12 }} />
                     <Line dataKey="pm25_mean" name="Daily PM2.5" stroke="#16a36a" strokeWidth={1.8}
                       dot={false} connectNulls={false} />
@@ -167,7 +167,7 @@ export default function Overview() {
                     <XAxis type="number" tick={{ fontSize: 11, fill: '#6b7c74' }} tickLine={false} axisLine={false} />
                     <YAxis type="category" dataKey="city" tick={{ fontSize: 12, fill: '#4a6358' }} tickLine={false} axisLine={false} width={50} />
                     <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8 }}
-                      formatter={(v: number) => [`${v.toFixed(1)} µg/m³`, 'Avg PM2.5']} />
+                      formatter={(v: any) => [`${Number(v).toFixed(1)} µg/m³`, 'Avg PM2.5']} />
                     <Bar dataKey="average_pm25" radius={[0, 6, 6, 0]}>
                       {data.city_summary.map((_, i) => (
                         <Cell key={i} fill={['#bdebd0','#6dc99b','#16a36a','#14532d'][i % 4]} />

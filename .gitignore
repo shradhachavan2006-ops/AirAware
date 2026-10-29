@@ -11,6 +11,8 @@ models/model_metadata.json
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !models/.gitkeep
+data/uploads/*
+!data/uploads/.gitkeep
 
 .pytest_cache/
 node_modules/
