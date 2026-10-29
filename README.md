@@ -1,6 +1,6 @@
-# AirAware — Air Quality Intelligence Dashboard
+# AirAware V2 — Air Quality Analytics & Forecasting Platform
 
-A college Data Science & Analytics project for analysing historical PM2.5 observations across four Indian cities: **Mumbai, Nagpur, Nashik, and Pune**. The primary application is a **React + FastAPI** stack with analytics, statistical insights, historical model evaluation, and **future PM2.5 forecasting**.
+A college Data Science & Analytics project for analysing, statistically testing, and forecasting PM2.5 air quality data across Indian cities. The platform is a **React + FastAPI** full-stack web application supporting built-in demo datasets (Mumbai, Nagpur, Nashik, Pune) **and user-uploaded custom CSV datasets**.
 
 ---
 
@@ -8,54 +8,63 @@ A college Data Science & Analytics project for analysing historical PM2.5 observ
 
 ```
 AirAware/
-├── app.py                          # Streamlit entry point (preserved for reference)
-├── pages/                          # Streamlit multi-page app (reference only)
-│   ├── 1_Overview.py
-│   ├── 2_Historical_Analysis.py
-│   ├── 3_Statistical_Insights.py
-│   └── 4_Prediction.py
-├── src/                            # Data processing, features, evaluation
-│   ├── aggregate_city.py
-│   ├── forecast.py                 # Per-city RF evaluation (generates reports/)
-│   ├── features.py                 # Feature engineering helpers
-│   ├── train_model.py              # Global model trainer
-│   └── ui.py                       # Shared Streamlit helpers
-├── backend/                        # FastAPI backend (primary)
+├── backend/                        # FastAPI backend
 │   ├── main.py                     # App factory, CORS, router registration
-│   ├── data_loader.py              # CSV loading and validation
-│   ├── forecast_engine.py          # In-process RF training + iterative future forecasts
+│   ├── data_loader.py              # CSV loading for legacy city_daily.csv
+│   ├── dataset_store.py            # V2 dataset registry (demos + uploads)
+│   ├── forecast_engine.py          # In-process RF training + iterative forecasts
 │   └── routers/
 │       ├── meta.py                 # /meta/cities, /meta/date-range
 │       ├── dashboard.py            # /dashboard/summary
 │       ├── observations.py         # /observations/recent
 │       ├── trends.py               # /trends/series, /trends/download
-│       ├── statistics.py           # /statistics/overview
-│       ├── evaluation.py           # /evaluation/cities, /evaluation/{city}
-│       └── forecast.py             # /forecast/cities, /forecast/{city}, /forecast/{city}/download
-├── frontend/                       # React + TypeScript + Vite + Tailwind (primary)
+│       ├── statistics.py           # /statistics/overview (legacy box-plots)
+│       ├── evaluation.py           # /evaluation/{city}
+│       ├── forecast.py             # /forecast/{city}
+│       ├── datasets.py             # /datasets — CRUD, upload, preview
+│       ├── quality.py              # /quality/{dataset_id} — profiling + cleaned CSV
+│       ├── stat_analysis.py        # /analysis/{dataset_id}/statistics
+│       └── regression.py           # /analysis/{dataset_id}/regression
+├── frontend/                       # React + TypeScript + Vite + Tailwind
 │   └── src/
 │       ├── api.ts                  # Typed API client (single source of truth)
-│       ├── Layout.tsx              # Sidebar navigation shell (5 pages)
+│       ├── Layout.tsx              # Sidebar navigation shell (10 pages)
 │       ├── App.tsx                 # React Router routes
+│       ├── context/
+│       │   └── DatasetContext.tsx  # Global active-dataset context (localStorage)
 │       └── pages/
 │           ├── Overview.tsx        # Dashboard KPIs + trend chart
 │           ├── Trends.tsx          # Multi-city historical comparison
-│           ├── Statistics.tsx      # Descriptive stats + box plots
+│           ├── Statistics.tsx      # Descriptive stats + box plots (legacy)
 │           ├── Evaluation.tsx      # Historical holdout model evaluation
-│           └── Forecast.tsx        # Future 7/14-day RF forecast (new)
+│           ├── Forecast.tsx        # Future 7/14-day RF forecast
+│           ├── DatasetManager.tsx  # Upload / switch / delete datasets
+│           ├── DataQuality.tsx     # Automated quality profiling report
+│           ├── StatAnalysis.tsx    # Hypothesis testing + inferential stats
+│           ├── Regression.tsx      # Correlation, SLR, MLR studio
+│           └── Methodology.tsx     # CRISP-DM, assumptions, ethics
 ├── data/
-│   └── processed/city_daily.csv   # Source dataset (1,988 records)
+│   ├── demo/                       # Built-in demo CSVs (4 cities)
+│   ├── processed/city_daily.csv    # Legacy source dataset (1,988 records)
+│   └── uploads/                    # User-uploaded CSVs (persisted; gitignored)
 ├── reports/
-│   ├── forecast_metrics.csv        # Holdout evaluation metrics
-│   └── forecast_predictions.csv   # Holdout actual vs predicted
-└── tests/                          # pytest suite (202 tests)
-    ├── test_dashboard.py
-    ├── test_evaluation.py
-    ├── test_features.py
-    ├── test_forecast.py            # 53 tests for /forecast/* endpoints
-    ├── test_observations.py
-    ├── test_statistics.py
-    └── test_trends.py
+│   ├── forecast_metrics.csv
+│   └── forecast_predictions.csv
+├── tests/                          # pytest suite (228 tests)
+│   ├── test_dashboard.py
+│   ├── test_dataset_store.py       # V2: dataset store unit tests
+│   ├── test_datasets_router.py     # V2: /datasets endpoints
+│   ├── test_evaluation.py
+│   ├── test_features.py
+│   ├── test_forecast.py
+│   ├── test_observations.py
+│   ├── test_quality_router.py      # V2: /quality endpoints
+│   ├── test_regression_router.py   # V2: /analysis/*/regression
+│   ├── test_stat_analysis_router.py# V2: /analysis/*/statistics
+│   ├── test_statistics.py
+│   └── test_trends.py
+├── requirements.txt
+└── README.md
 ```
 
 ---
@@ -75,15 +84,16 @@ AirAware/
 ### Python backend
 
 ```powershell
-# From the project root
+# From AirAware_Improved/ (project root containing .venv/)
 .venv\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
+python -m pip install -r AirAware/requirements.txt
+pip install httpx      # required for FastAPI TestClient
 ```
 
 ### React frontend
 
 ```powershell
-cd frontend
+cd AirAware\frontend
 npm install
 ```
 
@@ -93,68 +103,58 @@ npm install
 
 ### 1 — Start the FastAPI backend
 
-Open a terminal in the project root with the virtual environment active:
+Open a terminal in `AirAware_Improved\AirAware\` with the virtual environment active:
 
 ```powershell
-.venv\Scripts\Activate.ps1
+..\..\.venv\Scripts\Activate.ps1
 python -m uvicorn backend.main:app --reload
 ```
 
-The API will be available at `http://127.0.0.1:8000`.
+The API will be available at `http://127.0.0.1:8000`.  
 Interactive docs: `http://127.0.0.1:8000/docs`
 
 ### 2 — Start the React frontend
 
-Open a **second** terminal:
+Open a **second** terminal in `AirAware_Improved\AirAware\frontend\`:
 
 ```powershell
-cd frontend
-.\node_modules\.bin\vite.ps1
+node .\node_modules\vite\bin\vite.js
 ```
 
-> **Note:** Use `.\node_modules\.bin\vite.ps1` instead of `npm run dev` when your project path contains parentheses (e.g. `DSA (Data Science & Analytics)`), which can confuse the `.cmd` wrapper.
+> **Note:** Use `node .\node_modules\vite\bin\vite.js` instead of `npm run dev` when your project path contains parentheses (e.g. `DSA (Data Science & Analytics)`), which can confuse the `.cmd` wrapper.
 
 The frontend will be available at `http://localhost:5173`.
-
-### 3 — (Optional) Streamlit fallback
-
-The Streamlit app is preserved for reference only. New features are implemented in React + FastAPI.
-
-```powershell
-.venv\Scripts\Activate.ps1
-python -m streamlit run app.py
-```
 
 ---
 
 ## Running tests
 
 ```powershell
-.venv\Scripts\Activate.ps1
-python -m pytest tests/ -v
+# From AirAware_Improved\AirAware\
+..\.venv\Scripts\python -m pytest
 ```
 
-Expected: **202 passed** (149 existing + 53 forecast tests).
+Expected: **228 passed** (202 existing + 26 V2 tests).
 
 ### TypeScript type check
 
 ```powershell
 cd frontend
-node node_modules/typescript/bin/tsc --noEmit
+node .\node_modules\typescript\bin\tsc -b
 ```
 
 ### Production build
 
 ```powershell
 cd frontend
-node node_modules/vite/bin/vite.js build
+node .\node_modules\vite\bin\vite.js build
 ```
-
-> **Note:** If your path contains parentheses, use `node ...` directly instead of `npm run build` to avoid shell escaping issues.
 
 ---
 
 ## API routes
+
+### Legacy routes (city_daily.csv — 4 cities)
 
 | Method | Route | Description |
 |--------|-------|-------------|
@@ -163,14 +163,28 @@ node node_modules/vite/bin/vite.js build
 | GET | `/meta/date-range` | Dataset date range |
 | GET | `/dashboard/summary` | Overview KPIs, trend series, city snapshot, recent rows |
 | GET | `/observations/recent` | Filterable recent observations |
-| GET | `/trends/series` | Multi-city time series for PM2.5 or station count |
+| GET | `/trends/series` | Multi-city PM2.5 or station-count time series |
 | GET | `/trends/download` | Filtered dataset as CSV download |
 | GET | `/statistics/overview` | Descriptive stats, box-plot data, coverage table |
 | GET | `/evaluation/cities` | Cities with historical evaluation data |
-| GET | `/evaluation/{city}` | Full holdout model evaluation for one city |
+| GET | `/evaluation/{city}` | Holdout model evaluation for one city |
 | GET | `/forecast/cities` | Cities available for future forecasting |
-| GET | `/forecast/{city}?horizon=7` | 7 or 14-day future PM2.5 forecast + historical tail |
-| GET | `/forecast/{city}/download?horizon=7` | Future forecast as CSV download |
+| GET | `/forecast/{city}` | 7 or 14-day future PM2.5 forecast |
+| GET | `/forecast/{city}/download` | Future forecast as CSV download |
+
+### V2 routes (per-dataset — any uploaded CSV)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| GET | `/datasets` | List all datasets (demo + uploads) |
+| POST | `/datasets/upload` | Upload a CSV dataset |
+| GET | `/datasets/{id}` | Dataset metadata |
+| GET | `/datasets/{id}/preview` | First N rows as JSON |
+| DELETE | `/datasets/{id}` | Delete an uploaded dataset |
+| GET | `/quality/{id}` | Full data quality profile |
+| GET | `/quality/{id}/cleaned` | Download cleaned CSV |
+| GET | `/analysis/{id}/statistics` | Inferential statistics + hypothesis tests |
+| GET | `/analysis/{id}/regression` | Correlation, SLR, and MLR analysis |
 
 All date parameters use inclusive `YYYY-MM-DD` bounds.
 
@@ -178,64 +192,84 @@ All date parameters use inclusive `YYYY-MM-DD` bounds.
 
 ## Pages
 
-| Page | Route | What it shows |
-|------|-------|---------------|
-| Overview | `/` | City + date filter · KPI cards · trend chart · city comparison · recent observations |
-| Trends | `/trends` | Multi-city line chart · metric toggle · summary table · CSV download |
-| Statistics | `/statistics` | Box plots · descriptive stats · coverage table · interpretation note |
-| Evaluation | `/evaluation` | Historical holdout score cards · actual vs predicted chart · prediction records · CSV download |
-| **Forecast** | `/forecast` | **City selector · 7/14-day RF forecast · combined chart · table · feature importance · CSV download** |
+| Page | Route | Description |
+|------|-------|-------------|
+| Overview | `/overview` | KPI cards · trend chart · city comparison · recent observations |
+| Explore & Trends | `/trends` | Multi-city line chart · metric toggle · summary table · CSV download |
+| Statistics | `/statistics` | Box plots · descriptive stats · coverage table |
+| Hypothesis Tests | `/stat-analysis` | Shapiro-Wilk · t-tests vs WHO/NAAQS · CI · seasonal ANOVA |
+| Regression Studio | `/regression` | Pearson correlation · SLR scatter + residuals · MLR coefficients |
+| Evaluation | `/evaluation` | Historical holdout score cards · actual vs predicted chart |
+| Forecast | `/forecast` | 7/14-day RF forecast · feature importance · CSV download |
+| Dataset Manager | `/datasets` | Upload CSVs · switch active dataset · delete uploads |
+| Data Quality | `/quality` | Quality score · column profiles · outliers · gap detection |
+| Methodology | `/methodology` | CRISP-DM · statistical methods · ethical disclaimers |
 
 ---
 
-## Forecast page — how it works
+## V2 Dataset Schema
 
-The **Forecast page** (`/forecast`) provides genuine future PM2.5 predictions for each city:
+User-uploaded CSVs must follow this schema:
 
-1. **Training**: A RandomForest model is trained on **all available historical data** for the selected city (no test holdout — the holdout evaluation is on the separate Evaluation page).
-2. **Features**: Today's PM2.5, lags at 1/2/3/7 days, 3-day rolling mean, 7-day rolling mean — identical to `src/forecast.py`.
-3. **Iterative rollout**: Each future step is predicted using the model output from the previous step (no look-ahead into real observations).
-4. **Output**: 7 or 14 daily predictions starting from `latest_observed_date + 1 day`.
-5. **Caching**: Models are cached in-process and invalidated when new data is loaded.
+| Column | Type | Required | Notes |
+|--------|------|----------|-------|
+| `date` | date | ✅ | `YYYY-MM-DD` preferred; other parseable formats accepted |
+| `pm25_mean` | float | ✅ | Daily mean PM2.5 in µg/m³ |
+| `station_count` | int | ❌ | Number of monitoring stations contributing |
+| `coverage_pct` | float | ❌ | Data coverage percentage (0–100) |
+| `city` | string | ❌ | City name (used for display only) |
 
-### Forecast limitations
-
-- RandomForest cannot extrapolate beyond its training distribution.
-- Uncertainty grows with forecast horizon (no prediction intervals are returned).
-- No meteorological inputs (wind speed, temperature, precipitation) are used.
-- These estimates are for academic demonstration — not official AQI forecasts.
+Maximum file size: **10 MB**. Minimum valid rows after cleaning: **10**.
 
 ---
 
-## Dataset and model notes
+## Statistical Methods
 
-- **Source dataset**: `data/processed/city_daily.csv` — 1,988 city-daily records, columns: `city`, `date`, `pm25_mean`, `station_count`, `coverage_pct`.
-- **Date range**: 2025-02-19 to 2026-10-13.
-- **PM2.5 values are reported in µg/m³** — not AQI.
-- **Evaluation results** (`reports/forecast_metrics.csv`, `reports/forecast_predictions.csv`) represent **historical holdout performance** of Persistence and RandomForest models. They are distinct from the Forecast page's future predictions and should not be interpreted as live forecasts.
-- A negative R² on the Evaluation page means the model performed worse than predicting the test-set mean. This is displayed accurately and not hidden.
-- Missing PM2.5 values are preserved as gaps in charts and excluded from aggregates.
+### Normality — Shapiro-Wilk
+$$W\text{-statistic},\ p\text{-value}\ (\alpha = 0.05).\ n > 5000 \Rightarrow \text{sampled to 5000}$$
 
-### Chronological split (Evaluation page)
-- Training: earliest 80% of samples per city.
-- Testing: latest 20% of samples.
-- No data leakage: rolling features reference only observations up to the forecast origin date.
+### One-sample t-test (vs WHO / NAAQS)
+$$t = \frac{\bar{x} - \mu_0}{s / \sqrt{n}},\quad d = \frac{\bar{x} - \mu_0}{s}\ \text{(Cohen's}\ d\text{)}$$
 
-### Model comparisons (Evaluation page)
+### 95% Confidence Interval
+$$\bar{x} \pm t_{0.025,\ n-1} \cdot \frac{s}{\sqrt{n}}$$
+
+### OLS Multiple Regression p-values
+$$SE = \sqrt{MSE \cdot \text{diag}((X^T X)^{-1})},\quad t_i = \hat\beta_i / SE_i$$
+
+---
+
+## Forecasting Model
+
+The **Forecast page** (`/forecast`) provides genuine future PM2.5 predictions:
+
+1. **Training**: RandomForest Regressor (150 estimators) trained on **all available historical data**.
+2. **Features**: `lag_1`, `lag_2`, `lag_3`, `lag_7`, `rolling_mean_3`, `rolling_mean_7`, `day_of_week`, `month`, `is_weekend`.
+3. **Iterative rollout**: Each future step uses the previous step's output (no look-ahead).
+4. **Output**: 7 or 14 daily predictions from `latest_observed_date + 1 day`.
+5. **Caching**: Models are cached in-process per city.
+
+> ⚠️ Forecast uncertainty grows with horizon. No meteorological inputs are used. For academic demonstration only.
+
+---
+
+## Model Evaluation Results (Evaluation page)
+
 | City | RF better than Persistence? |
-|------|-----------------------------|
+|------|------------------------------|
 | Mumbai | ❌ No (RF MAE 22.2 vs Persistence 3.5) |
 | Nagpur | ✅ Yes (RF MAE 4.3 vs Persistence 4.6) |
 | Nashik | ❌ Marginally (RF MAE 4.2 vs Persistence 4.0) |
 | Pune | ❌ No (RF MAE 5.0 vs Persistence 4.0) |
 
-For Mumbai in particular, RandomForest performs dramatically worse than persistence, likely due to distributional shift between the training and test periods.
+A negative R² means the model performed worse than the test-set mean — displayed accurately, not hidden.
 
 ---
 
 ## Limitations
 
-1. **End-to-end browser test**: The frontend builds and type-checks correctly. Live API integration requires manual verification in a browser with both servers running.
-2. **Forecast model per city**: The Forecast page trains models on-demand (cached). The first request per city may take ~15–30 seconds.
-3. **Chunk size**: The production bundle is ~703 kB gzip (205 kB). Code-splitting could reduce it further.
-4. **No authentication**: Academic demonstration only. Do not expose publicly without access controls.
+1. **End-to-end browser test**: Both servers must be running for live API integration.
+2. **Forecast model per city**: First request per city may take ~15–30 seconds (on-demand training).
+3. **Bundle size**: Production bundle ~769 kB uncompressed (~221 kB gzip). Code-splitting could reduce it.
+4. **No authentication**: Academic demonstration only — do not expose publicly without access controls.
+5. **Time-series autocorrelation**: Violates classical hypothesis-test independence assumptions — treat p-values as approximate.

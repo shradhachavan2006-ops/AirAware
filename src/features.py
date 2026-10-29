@@ -37,9 +37,9 @@ def make_supervised_data(df: pd.DataFrame) -> pd.DataFrame:
         g["rolling_std_7"] = past.rolling(7, min_periods=7).std()
 
         target_dates = g.index + pd.Timedelta(days=1)
-        g["target_day_of_week"] = target_dates.dayofweek
+        g["target_day_of_week"] = target_dates.day_of_week
         g["target_month"] = target_dates.month
-        doy = target_dates.dayofyear
+        doy = target_dates.day_of_year
         g["target_doy_sin"] = __import__("numpy").sin(2 * __import__("numpy").pi * doy / 365.25)
         g["target_doy_cos"] = __import__("numpy").cos(2 * __import__("numpy").pi * doy / 365.25)
         g["target"] = y.shift(-1)
@@ -71,7 +71,7 @@ def build_next_day_features(city_df: pd.DataFrame):
         return None
 
     target_date = g.index[-1] + pd.Timedelta(days=1)
-    doy = target_date.dayofyear
+    doy = target_date.day_of_year
     row = {
         "city": str(city_df["city"].iloc[-1]),
         "pm25_lag_1": y.iloc[-1],
@@ -81,7 +81,7 @@ def build_next_day_features(city_df: pd.DataFrame):
         "rolling_mean_3": y.iloc[-3:].mean(),
         "rolling_mean_7": y.iloc[-7:].mean(),
         "rolling_std_7": y.iloc[-7:].std(),
-        "target_day_of_week": target_date.dayofweek,
+        "target_day_of_week": target_date.day_of_week,
         "target_month": target_date.month,
         "target_doy_sin": np.sin(2 * np.pi * doy / 365.25),
         "target_doy_cos": np.cos(2 * np.pi * doy / 365.25),
